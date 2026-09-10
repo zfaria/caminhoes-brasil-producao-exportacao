@@ -9,7 +9,9 @@ anos montando os caminhões que estão dentro desses números.
 ## Por que caminhão, por que eu
 
 Caminhão não é um produto de prateleira — é o meio pelo qual quase tudo que se consome no
-Brasil chega a algum lugar: mais de 60% da carga do país roda sobre pneus de caminhão. Quando
+Brasil chega a algum lugar: o modal rodoviário responde por cerca de 61% da
+[matriz de transporte de cargas do país, segundo a CNT](https://data.cnt.org.br/en/) (Confederação
+Nacional do Transporte). Quando
 a produção de caminhões sobe ou cai 40% em um único ano, como os dados abaixo mostram que já
 aconteceu **cinco vezes** desde 1957, isso não é uma linha de gráfico — é linha de montagem
 parando ou trabalhando em três turnos, é fornecedor sendo chamado ou dispensado, é gente sendo
@@ -53,8 +55,8 @@ Nenhuma tendência, número ou causa foi presumida sem essa base.
    entre as três séries — em nível e em variação percentual anual.
 4. **Sazonalidade mensal** ([`analysis/eda_sazonalidade.py`](analysis/eda_sazonalidade.py)): calcula
    um índice sazonal por mês (valor do mês ÷ média dos 12 meses do mesmo ano), o que isola o
-   padrão de calendário sem o efeito de tendência de longo prazo — necessário numa série que
-   cresce mais de 40x entre 1957 e o pico de 2011.
+   padrão de calendário sem o efeito de tendência de longo prazo — necessário numa série cuja
+   produção anual do pico de 2011 é ~13,7 vezes a de 1957 (16.259 → 223.602 unidades).
 
 Para reproduzir:
 
