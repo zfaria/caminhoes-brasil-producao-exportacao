@@ -77,20 +77,30 @@ dos 12 meses do ano).
 - Anotação nos meses de Janeiro e Dezembro: "recesso coletivo de fim de ano — vale sazonal em 72%
   dos anos" e em Agosto-Outubro: "pico do ano — renovação de frota + escoamento de safra".
 
-## Story Point 5 — "Quem puxa o ciclo não é quem exporta"
+## Story Point 5 — "O mercado interno sempre decidiu o ciclo — mas a exportação parou de ser irrelevante"
 
-**Insight central.** Dividir em dois gráficos na mesma tela (dashboard com dois objetos):
+**Insight central.** Importante: a correlação Produção×Exportação da série *completa* (0,003) é um
+artefato das décadas de 1960-70, quando a base de exportação era tão pequena que qualquer oscilação
+virava uma % absurda (1970: +2950%, de 4 para 122 unidades). Não usar esse número isolado sem o
+contexto — ver a tabela por janela de anos no README e em
+[`analysis/eda_caminhoes.py`](../analysis/eda_caminhoes.py) antes de montar esta tela.
+
+Dividir em dois gráficos na mesma tela (dashboard com dois objetos):
 
 1. Gráfico de dispersão (scatter): `Producao_var_pct_aa` no eixo X, `Exportacao_var_pct_aa` no
-   eixo Y, um ponto por ano — a nuvem de pontos sem padrão linear é a prova visual da correlação
-   ≈ 0. Adicionar linha de tendência do Tableau (Analytics → Trend Line) para reforçar que ela é
-   praticamente horizontal/sem inclinação.
-2. Segundo gráfico: barras de `Exportacao_pct_Producao` por `Ano`, com os anos 2015-2017
-   destacados — mostrando que a participação da exportação sobe justamente nos anos de crise
-   doméstica, mesmo sem a exportação crescer em volume.
+   eixo Y, um ponto por ano, **filtrado para `Ano >= 2000`** (parâmetro de filtro para o usuário
+   testar outras janelas, ex. `>= 1980` e `>= 2010`, e ver a correlação subir — isso é mais honesto
+   e mais interessante do que mostrar só um numero). Adicionar linha de tendência do Tableau
+   (Analytics → Trend Line): na janela 2000-2025 ela tem inclinação positiva moderada, não é mais
+   horizontal.
+2. Segundo gráfico: barras de `Exportacao_pct_Producao` por `Ano` (série completa), com os anos
+   2015-2017 destacados — mostrando que a participação da exportação sobe justamente nos anos de
+   crise doméstica.
 
-- Texto de apoio na tela com os dois coeficientes de correlação (0,923 vs. 0,003), citados
-  diretamente do resultado de [`analysis/eda_caminhoes.py`](../analysis/eda_caminhoes.py).
+- Texto de apoio na tela com a tabela de correlação por janela (0,910/0,003 na série completa vs.
+  0,899/0,430 em 1980+, 0,850/0,508 em 2000+, 0,844/0,575 em 2010+) — o ponto não é "exportação não
+  importa", é "mercado interno importa mais, de forma estável, em qualquer janela; exportação
+  ganhou força à medida que o mercado externo amadureceu".
 
 ## Story Point 6 — "O que os dados confirmam de quem já viveu isso por dentro"
 

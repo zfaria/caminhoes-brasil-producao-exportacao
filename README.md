@@ -107,8 +107,8 @@ três métricas — produção, emplacamento e exportação:
 | Emplacamento (1957-2025) | Janeiro (0,84) | Agosto (1,10) |
 | Exportação (2001-2025)* | Janeiro (0,59) | Outubro (1,17) |
 
-Janeiro é o mês mais fraco do ano em **26 dos últimos 68 anos**, e Dezembro em outros **23** — juntos,
-Dezembro e Janeiro concentram o vale sazonal em **72% dos anos** da série. Isso bate com uma
+Janeiro é o mês mais fraco do ano em **26 dos 69 anos** da série, e Dezembro em outros **23** — juntos,
+Dezembro e Janeiro concentram o vale sazonal em **71% dos anos** da série. Isso bate com uma
 prática real da indústria automotiva brasileira, que eu vivenciei em primeira mão: o **recesso
 coletivo de fim de ano** — férias coletivas e parada de linha entre o fim de dezembro e o início
 de janeiro, geralmente coincidindo com balanço de estoque e, em alguns anos, transição de ano-modelo.
@@ -123,36 +123,55 @@ e qualquer variação pequena gera índices desproporcionais. Por isso a leitura
 exportação usa a janela mais recente e mais representativa do padrão atual (2001-2025); os dados
 completos seguem disponíveis em [`data/processed/anfavea_caminhoes_mensal_consolidado.csv`](data/processed/anfavea_caminhoes_mensal_consolidado.csv).
 
-## Insight central: quem puxa o ciclo não é quem exporta
+## Insight central: o mercado interno sempre decidiu o ciclo — mas a exportação parou de ser irrelevante
 
 A pergunta óbvia para uma indústria que exporta caminhões é: os ciclos de alta e baixa vêm da
-demanda externa? **Os dados dizem que não.**
+demanda externa? A primeira leitura dos dados sugeriria que não, quase por completo — mas essa
+leitura inicial escondia um artefato estatístico que só apareceu ao investigar mais a fundo, e vale
+registrar o processo, não só a conclusão final.
 
 Em nível (quanto se produz, exporta e vende internamente a cada ano, 1965-2025), produção e
-emplacamento (mercado interno) têm correlação de **0,972** — andam praticamente juntos, o que já
-era esperado, já que a maior parte do que se produz é vendido no Brasil. Produção e exportação
-correlacionam bem menos: **0,751**.
+emplacamento (mercado interno) têm correlação de **0,972**, enquanto produção e exportação
+correlacionam bem menos: **0,751**. Até aqui, nenhuma surpresa — a maior parte do que se produz é
+vendido no Brasil.
 
-A diferença fica ainda mais clara quando se olha para a **variação percentual ano a ano** — ou
-seja, não "o quanto se produz", mas "o quanto o mercado oscila de um ano para o outro":
+O teste mais rigoroso é a correlação da **variação percentual ano a ano** — não "o quanto se
+produz", mas "o quanto o mercado oscila de um ano para o outro". Rodada sobre a série inteira
+(1966-2025), essa correlação despenca para **0,003** entre produção e exportação — praticamente
+zero — contra **0,923** entre produção e emplacamento. À primeira vista, isso sugeriria que a
+exportação é um fluxo totalmente desconectado dos ciclos domésticos.
 
-| Correlação da variação anual (%) | Coeficiente |
-|---|---|
-| Produção × Emplacamento | **0,923** |
-| Produção × Exportação | **0,003** |
+Mas esse quase-zero é um artefato de base pequena, não um sinal real: nas décadas de 1960-70 o
+volume de exportação de caminhões era tão baixo (às vezes 3 a 9 unidades por ano) que qualquer
+oscilação mínima virava uma variação percentual absurda — em 1970, a exportação foi de 4 para 122
+unidades, uma "alta" de **+2.950%** que não representa nada além do tamanho ínfimo da base. Esses
+outliers de décadas em que a exportação ainda não existia como mercado relevante dominam a
+correlação da série inteira e escondem o padrão real.
 
-A correlação entre a variação da produção e a variação da exportação é essencialmente **zero**. Os
-ciclos de boom e crise que caracterizam a indústria de caminhões no Brasil — as quedas de 30-50%
-em um único ano — são movidos quase inteiramente pelo mercado interno. A exportação se comporta
-como um fluxo largamente independente desses ciclos.
+Restringindo a mesma correlação a janelas onde a exportação já tinha uma base minimamente
+relevante, o quadro muda — e de forma consistente e crescente:
 
-Isso não significa que a exportação seja irrelevante nos anos de crise — pelo contrário: a
-participação da exportação na produção total **atinge seus maiores valores exatamente nos anos
-de colapso do mercado interno** (35,6% em 2016 e 34,0% em 2017, os dois maiores picos da série,
-bem acima da média histórica de ~16%). Em números absolutos a exportação não cresce nesses anos —
-ela simplesmente cai menos do que a produção total, funcionando como um amortecedor parcial para
-os fabricantes justamente quando o mercado interno mais precisa de alívio, sem no entanto ser a
-força que dita o tamanho do ciclo.
+| Janela | Produção × Emplacamento | Produção × Exportação |
+|---|---|---|
+| 1958/66–2025 (série completa) | 0,910 | 0,003 |
+| 1980–2025 | 0,899 | 0,430 |
+| 2000–2025 | 0,850 | 0,508 |
+| 2010–2025 | 0,844 | 0,575 |
+
+Duas coisas ficam claras ao mesmo tempo: o mercado interno **sempre foi e continua sendo** o que
+mais dita o tamanho do ciclo de produção — sua correlação fica estável entre 0,84 e 0,91 em
+qualquer janela. E a exportação **deixou de ser um fluxo desconectado**: à medida que o mercado
+externo amadureceu, seus movimentos passaram a acompanhar cada vez mais os da produção total —
+mas, mesmo na janela mais recente (2010-2025), ainda com bem menos força (0,575) do que o mercado
+doméstico (0,844).
+
+Isso também explica um padrão visível nos anos de crise doméstica: a participação da exportação na
+produção total **atinge seus maiores valores exatamente nos anos de colapso do mercado interno**
+(35,6% em 2016 e 34,0% em 2017, os dois maiores picos da série, bem acima da média histórica de
+~16%). Em números absolutos a exportação não necessariamente cresce nesses anos — ela cai menos do
+que a produção total, funcionando como amortecedor parcial para os fabricantes justamente quando o
+mercado interno mais precisa de alívio, sem no entanto ser, ainda hoje, a força que mais dita o
+tamanho do ciclo.
 
 ## O que isso significa pra quem já viveu por dentro
 
@@ -164,8 +183,9 @@ setor por mais de quatro anos não me deu acesso a nenhum dado que não esteja a
 referência para reconhecer, nos números, o motivo de cada virada de ciclo que meus colegas de
 linha sentiam antes de qualquer manchete confirmar.
 
-O padrão mais útil que os dados revelam — dependência do mercado interno, não do externo, como
-motor do ciclo, e antecipação regulatória como gatilho recorrente e previsível de queda — é
+O padrão mais útil que os dados revelam — dependência maior do mercado interno do que do externo
+como motor do ciclo (ainda que a exportação venha ganhando peso), e antecipação regulatória como
+gatilho recorrente e previsível de queda — é
 exatamente o tipo de leitura que interessa a quem planeja produção, estoque e contratação num
 ambiente industrial: a próxima mudança de norma de emissões (ou de crédito, ou de juros) vale
 mais como sinal de alerta do que qualquer expectativa isolada de mercado externo.

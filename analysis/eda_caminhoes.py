@@ -67,6 +67,25 @@ print("=" * 70)
 print(df[["Producao_var_pct_aa", "Exportacao_var_pct_aa", "Emplacamento_var_pct_aa"]].corr().round(3))
 
 print("\n" + "=" * 70)
+print("MESMA CORRELACAO, POR JANELA DE ANOS (a serie completa e distorcida pelas")
+print("decadas de 1960-70, quando a base de exportacao era proxima de zero e")
+print("qualquer oscilacao minima virava uma variacao percentual absurda - ex.:")
+print("1970 teve +2950% de 'alta', de 4 para 122 unidades)")
+print("=" * 70)
+cols = ["Producao_var_pct_aa", "Exportacao_var_pct_aa", "Emplacamento_var_pct_aa"]
+janelas = [
+    ("serie completa", df),
+    ("1980-2025", df[df["Ano"] >= 1980]),
+    ("2000-2025", df[df["Ano"] >= 2000]),
+    ("2010-2025", df[df["Ano"] >= 2010]),
+]
+for nome, sub in janelas:
+    d = sub[cols].dropna()
+    c = d.corr()
+    print(f"{nome:16s} (n={len(d):2d})  Producao x Emplacamento: {c.loc[cols[0], cols[2]]:.3f}"
+          f"   Producao x Exportacao: {c.loc[cols[0], cols[1]]:.3f}")
+
+print("\n" + "=" * 70)
 print("ULTIMA DECADA (2016-2025)")
 print("=" * 70)
 print(df[df["Ano"] >= 2016][["Ano", "Producao", "Exportacao", "Emplacamento", "Exportacao_pct_Producao"]].to_string(index=False))
