@@ -72,7 +72,11 @@ python analysis/eda_sazonalidade.py
 A produção de caminhões no Brasil não cresce em linha reta — ela sobe e desaba em ciclos
 abruptos, quase sempre de dois dígitos percentuais em um único ano. Os dados mostram picos e
 vales locais em praticamente metade dos 69 anos da série. Cinco desses movimentos concentram os
-maiores saltos e quedas:
+maiores saltos e quedas. Duas dessas causas citam o **PROCONVE** (Programa de Controle da Poluição
+do Ar por Veículos Automotores) — o programa brasileiro que define, em fases (P1 a P8), os limites
+máximos de poluentes (NOx e material particulado) para motores novos, seguindo aproximadamente o
+mesmo cronograma das normas europeias Euro: **P7 (2012) equivale ao Euro 5**, **P8 (2023) equivale
+ao Euro 6**.
 
 | Período | Produção (unid.) | Variação | O que os dados públicos apontam como causa |
 |---|---|---|---|
