@@ -44,7 +44,7 @@ Nenhuma tendência, número ou causa foi presumida sem essa base.
 1. **Consolidação** ([`scripts/consolidar_dados.py`](scripts/consolidar_dados.py)): lê os três CSVs
    brutos (separador `;`, linha de título antes do cabeçalho, encoding UTF-8 com BOM), padroniza
    nomes de colunas e período, e gera dois datasets tidy em [`data/processed/`](data/processed/):
-   - `anfavea_caminhoes_longo.csv` — formato longo (`Ano`, `Metrica`, `Valor`), pronto para o Tableau
+   - `anfavea_caminhoes_longo.csv` — formato longo (`Ano`, `Metrica`, `Valor`), pronto para gráficos com as três séries juntas
    - `anfavea_caminhoes_consolidado.csv` — formato largo com métricas derivadas: participação da
      exportação/emplacamento na produção (%) e variação percentual ano a ano de cada série
 2. **Checagem de integridade**: nenhum ano duplicado por métrica; conversão numérica com validação
@@ -197,30 +197,26 @@ mais como sinal de alerta do que qualquer expectativa isolada de mercado externo
 ```
 ├── data/
 │   ├── raw/                      CSVs originais da ANFAVEA, anuais e mensais (não editados)
-│   └── processed/                Datasets consolidados (anual e mensal, longo e largo) prontos para Tableau
+│   └── processed/                Datasets consolidados (anual e mensal, longo e largo) prontos para análise
 ├── scripts/
 │   └── consolidar_dados.py       Limpeza e consolidação das 6 séries (3 anuais + 3 mensais)
 ├── analysis/
 │   ├── eda_caminhoes.py          Picos, vales, variações e correlações (anual)
 │   └── eda_sazonalidade.py       Índice sazonal mensal e recesso de fim de ano
-├── tableau/
-│   └── story_guide.md            Roteiro de construção da Story no Tableau Desktop
 ├── dashboard/
-│   └── story.html                Protótipo interativo da Story (HTML/SVG, mesma estrutura de 6 telas)
+│   └── story.html                Dashboard interativo (HTML/SVG puro, sem dependências), 6 telas
 └── README.md
 ```
 
 ## Dashboard
 
-O dashboard final é construído como uma **Story** no Tableau Public, seguindo a mesma narrativa
-deste README (abertura → evolução → sazonalidade → insight central → fechamento). Roteiro completo
-de construção em [`tableau/story_guide.md`](tableau/story_guide.md). Link para a versão publicada
-no Tableau Public: *(a incluir depois de montada no Tableau Desktop)*.
+O dashboard é uma página HTML/SVG standalone em [`dashboard/story.html`](dashboard/story.html),
+sem nenhuma dependência externa — abre direto no navegador. Segue a mesma narrativa deste README
+(abertura → evolução → padrão regulatório → sazonalidade → insight central → fechamento) em 6 telas
+navegáveis, com os gráficos reais (linha, barras, dispersão), legendas clicáveis, tooltips e tabela
+de dados por trás de cada gráfico.
 
-Enquanto isso, [`dashboard/story.html`](dashboard/story.html) é um protótipo interativo standalone
-(HTML/SVG puro, sem dependências) com a mesma estrutura de 6 telas, os mesmos dados e os mesmos
-gráficos — útil como referência visual para montar a Story no Tableau, ou como versão alternativa
-do dashboard. Para abrir: baixe o arquivo e abra no navegador, ou sirva a pasta localmente
+Para abrir: baixe o arquivo e abra direto no navegador, ou sirva a pasta localmente
 (`python -m http.server`, por exemplo) e acesse `dashboard/story.html`.
 
 ## Fontes das causas apontadas para os pontos de inflexão

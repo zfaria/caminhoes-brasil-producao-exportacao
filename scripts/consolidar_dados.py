@@ -1,6 +1,7 @@
 """
 Consolida as series historicas anuais e mensais da ANFAVEA (Producao,
-Exportacao, Emplacamento) de caminhoes em datasets tidy, prontos para Tableau.
+Exportacao, Emplacamento) de caminhoes em datasets tidy, prontos para analise
+e visualizacao.
 
 Fonte: ANFAVEA - Associacao Nacional dos Fabricantes de Veiculos Automotores
        anfavea.com.br/site/edicoes-em-excel/
@@ -76,7 +77,7 @@ def ler_serie(nome_metrica: str, arquivo: str) -> pd.DataFrame:
 def main():
     series = [ler_serie(nome, arq) for nome, arq in FILES.items()]
 
-    # --- formato longo (tidy) - ideal para Tableau ---
+    # --- formato longo (tidy) - ideal para graficos com as 3 metricas juntas ---
     long_df = pd.concat(series, ignore_index=True).sort_values(["Metrica", "Ano"])
 
     # checagem de integridade: nenhum ano duplicado dentro da mesma metrica
