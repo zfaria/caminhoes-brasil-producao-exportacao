@@ -4,10 +4,6 @@ Análise de dados públicos da ANFAVEA (1957–2025) sobre produção, exportaç
 (vendas internas) de caminhões no Brasil — construída por alguém que passou os últimos 4+
 anos montando os caminhões que estão dentro desses números.
 
-> **Status:** projeto em construção. A seção de sazonalidade mensal está pendente de novas
-> planilhas mensais da ANFAVEA (os arquivos originais usados aqui são séries **anuais**,
-> 1957–2025). Este README será atualizado assim que essa parte for incorporada.
-
 ---
 
 ## Por que caminhão, por que eu
@@ -28,11 +24,14 @@ públicos e reais da indústria, sem inventar número ou causa que a série não
 ## Fonte dos dados
 
 - **ANFAVEA** (Associação Nacional dos Fabricantes de Veículos Automotores) — [Edições em Excel](https://anfavea.com.br/site/edicoes-em-excel/)
-- Três séries anuais, categoria **Caminhões**, extraídas em 10/09/2026:
-  - `PRODUCAO` — 1957–2025 (69 anos)
-  - `EMPLACAMENTO` — 1957–2025 (69 anos) — proxy oficial da ANFAVEA para vendas no mercado interno
-  - `EXPORTACAO` — 1965–2025 (61 anos; a ANFAVEA não reporta exportação de caminhões antes de 1965)
-- Arquivos originais em [`data/raw/`](data/raw/), sem qualquer alteração de conteúdo.
+- Seis séries, categoria **Caminhões**, extraídas em 10/09/2026 — anuais (1957/1965–2025) e
+  mensais (1957/1965 – ago/2026, com 2026 ainda em curso):
+  - `PRODUCAO` — anual 1957–2025 (69 anos) · mensal jan/1957–ago/2026
+  - `EMPLACAMENTO` — anual 1957–2025 (69 anos) · mensal jan/1957–ago/2026 — proxy oficial da ANFAVEA para vendas no mercado interno
+  - `EXPORTACAO` — anual 1965–2025 (61 anos; a ANFAVEA não reporta exportação de caminhões antes de 1965) · mensal jan/1965–ago/2026
+- Arquivos originais em [`data/raw/`](data/raw/), sem qualquer alteração de conteúdo. 2026 é
+  tratado como ano incompleto (8 meses) em todas as análises de sazonalidade, para não distorcer
+  a média histórica.
 
 Todos os números citados neste README vêm diretamente dessas três séries ou de fontes públicas
 explicitamente linkadas na seção [Fontes das causas apontadas](#fontes-das-causas-apontadas-para-os-pontos-de-inflexão).
@@ -48,10 +47,14 @@ Nenhuma tendência, número ou causa foi presumida sem essa base.
      exportação/emplacamento na produção (%) e variação percentual ano a ano de cada série
 2. **Checagem de integridade**: nenhum ano duplicado por métrica; conversão numérica com validação
    de tipo (`Ano` como inteiro, `Valor` como numérico).
-3. **Exploração** ([`analysis/eda_caminhoes.py`](analysis/eda_caminhoes.py)): identifica picos e
-   vales locais na série de produção (ano estritamente maior/menor que o anterior e o seguinte),
-   maiores variações ano a ano, extremos de participação da exportação e correlações entre as três
-   séries — em nível e em variação percentual anual.
+3. **Exploração anual** ([`analysis/eda_caminhoes.py`](analysis/eda_caminhoes.py)): identifica
+   picos e vales locais na série de produção (ano estritamente maior/menor que o anterior e o
+   seguinte), maiores variações ano a ano, extremos de participação da exportação e correlações
+   entre as três séries — em nível e em variação percentual anual.
+4. **Sazonalidade mensal** ([`analysis/eda_sazonalidade.py`](analysis/eda_sazonalidade.py)): calcula
+   um índice sazonal por mês (valor do mês ÷ média dos 12 meses do mesmo ano), o que isola o
+   padrão de calendário sem o efeito de tendência de longo prazo — necessário numa série que
+   cresce mais de 40x entre 1957 e o pico de 2011.
 
 Para reproduzir:
 
@@ -59,6 +62,7 @@ Para reproduzir:
 python -m pip install pandas numpy
 python scripts/consolidar_dados.py
 python analysis/eda_caminhoes.py
+python analysis/eda_sazonalidade.py
 ```
 
 ## A curva: quase 70 anos em cinco movimentos
@@ -87,6 +91,37 @@ branda de 2020 (-19,9%, amortecida pelo agronegócio e e-commerce, que sustentar
 caminhões mais do que outros segmentos automotivos durante a pandemia⁶), 2021 veio com alta de
 **+74,6%** — a segunda maior expansão anual da série inteira, atrás apenas de 2010 (pós-crise de
 2008/09, +57,0%).
+
+## Dentro do ano: o ritmo previsível por trás dos ciclos
+
+Além dos ciclos de anos, existe um ciclo menor que se repete dentro de cada ano — e que qualquer
+um que já trabalhou numa linha de montagem reconhece: o calendário de produção não é plano.
+
+Calculando um índice sazonal por mês (valor do mês dividido pela média dos 12 meses do mesmo ano,
+o que isola o padrão de calendário do crescimento de longo prazo da série), o padrão é o mesmo nas
+três métricas — produção, emplacamento e exportação:
+
+| | Mês mais fraco (índice) | Mês mais forte (índice) |
+|---|---|---|
+| Produção (1957-2025) | Janeiro (0,82) | Outubro (1,12) |
+| Emplacamento (1957-2025) | Janeiro (0,84) | Agosto (1,10) |
+| Exportação (2001-2025)* | Janeiro (0,59) | Outubro (1,17) |
+
+Janeiro é o mês mais fraco do ano em **26 dos últimos 68 anos**, e Dezembro em outros **23** — juntos,
+Dezembro e Janeiro concentram o vale sazonal em **72% dos anos** da série. Isso bate com uma
+prática real da indústria automotiva brasileira, que eu vivenciei em primeira mão: o **recesso
+coletivo de fim de ano** — férias coletivas e parada de linha entre o fim de dezembro e o início
+de janeiro, geralmente coincidindo com balanço de estoque e, em alguns anos, transição de ano-modelo.
+A produção então acelera ao longo do ano, atingindo o pico entre agosto e outubro — período que
+historicamente concentra tanto a renovação de frota antes do fim do ano quanto a demanda logística
+ligada à safra agrícola de exportação (soja e milho, que dependem fortemente de transporte
+rodoviário no escoamento).
+
+\* A série de exportação mensal completa (1965-2025) tem índice extremamente ruidoso nas décadas de
+1960-80, quando os volumes mensais de exportação eram próximos de zero (às vezes 0-3 unidades/mês)
+e qualquer variação pequena gera índices desproporcionais. Por isso a leitura de sazonalidade de
+exportação usa a janela mais recente e mais representativa do padrão atual (2001-2025); os dados
+completos seguem disponíveis em [`data/processed/anfavea_caminhoes_mensal_consolidado.csv`](data/processed/anfavea_caminhoes_mensal_consolidado.csv).
 
 ## Insight central: quem puxa o ciclo não é quem exporta
 
@@ -139,14 +174,15 @@ mais como sinal de alerta do que qualquer expectativa isolada de mercado externo
 
 ```
 ├── data/
-│   ├── raw/                 CSVs originais da ANFAVEA (não editados)
-│   └── processed/           Dataset consolidado (longo e largo) pronto para Tableau
+│   ├── raw/                      CSVs originais da ANFAVEA, anuais e mensais (não editados)
+│   └── processed/                Datasets consolidados (anual e mensal, longo e largo) prontos para Tableau
 ├── scripts/
-│   └── consolidar_dados.py  Limpeza e consolidação das 3 séries
+│   └── consolidar_dados.py       Limpeza e consolidação das 6 séries (3 anuais + 3 mensais)
 ├── analysis/
-│   └── eda_caminhoes.py     Picos, vales, variações e correlações
+│   ├── eda_caminhoes.py          Picos, vales, variações e correlações (anual)
+│   └── eda_sazonalidade.py       Índice sazonal mensal e recesso de fim de ano
 ├── tableau/
-│   └── story_guide.md       Roteiro de construção da Story no Tableau Desktop
+│   └── story_guide.md            Roteiro de construção da Story no Tableau Desktop
 └── README.md
 ```
 

@@ -1,6 +1,6 @@
 """
-Consolida as series historicas anuais da ANFAVEA (Producao, Exportacao,
-Emplacamento) de caminhoes em um unico dataset tidy, pronto para Tableau.
+Consolida as series historicas anuais e mensais da ANFAVEA (Producao,
+Exportacao, Emplacamento) de caminhoes em datasets tidy, prontos para Tableau.
 
 Fonte: ANFAVEA - Associacao Nacional dos Fabricantes de Veiculos Automotores
        anfavea.com.br/site/edicoes-em-excel/
@@ -18,6 +18,41 @@ FILES = {
     "Exportacao": "anfavea_2026-09-10-EXPORTACAO.csv",
     "Emplacamento": "anfavea_2026-09-10-EMPLACAMENTO.csv",
 }
+
+FILES_MENSAL = {
+    "Producao": "anfavea_2026-09-10-PRODUCAO-MENSAL.csv",
+    "Exportacao": "anfavea_2026-09-10-EXPORTACAO-MENSAL.csv",
+    "Emplacamento": "anfavea_2026-09-10-EMPLACAMENTO-MENSAL.csv",
+}
+
+MESES = {
+    "JAN": 1, "FEV": 2, "MAR": 3, "ABR": 4, "MAI": 5, "JUN": 6,
+    "JUL": 7, "AGO": 8, "SET": 9, "OUT": 10, "NOV": 11, "DEZ": 12,
+}
+
+
+def ler_serie_mensal(nome_metrica: str, arquivo: str) -> pd.DataFrame:
+    """Le um CSV mensal da ANFAVEA (Periodo = 'AAAA - MES') e retorna
+    um DataFrame tidy: Ano, Mes, MesNome, Data, Metrica, Valor."""
+    caminho = RAW_DIR / arquivo
+    df = pd.read_csv(
+        caminho,
+        sep=";",
+        skiprows=1,
+        encoding="utf-8-sig",
+        dtype={"Período": str},
+    )
+    df = df.rename(columns={"Período": "Periodo", "CAMINHÕES": "Valor"})
+    partes = df["Periodo"].str.split(" - ", expand=True)
+    df["Ano"] = partes[0].astype(int)
+    df["MesNome"] = partes[1].str.strip()
+    df["Mes"] = df["MesNome"].map(MESES)
+    df["Data"] = pd.to_datetime(
+        df["Ano"].astype(str) + "-" + df["Mes"].astype(str) + "-01"
+    )
+    df["Valor"] = pd.to_numeric(df["Valor"], errors="coerce")
+    df["Metrica"] = nome_metrica
+    return df[["Data", "Ano", "Mes", "MesNome", "Metrica", "Valor"]]
 
 
 def ler_serie(nome_metrica: str, arquivo: str) -> pd.DataFrame:
@@ -67,14 +102,44 @@ def main():
 
     wide_df.to_csv(OUT_DIR / "anfavea_caminhoes_consolidado.csv", index=False, encoding="utf-8-sig")
 
-    print("Anos cobertos por metrica:")
+    print("Anos cobertos por metrica (serie anual):")
     for nome in FILES:
         sub = long_df[long_df["Metrica"] == nome]["Ano"]
         print(f"  {nome}: {sub.min()}-{sub.max()} ({sub.nunique()} anos)")
 
+    # --- series mensais ---
+    mensal = pd.concat(
+        [ler_serie_mensal(nome, arq) for nome, arq in FILES_MENSAL.items()],
+        ignore_index=True,
+    ).sort_values(["Metrica", "Data"])
+
+    dup_m = mensal.duplicated(subset=["Metrica", "Data"]).sum()
+    assert dup_m == 0, f"{dup_m} linhas mensais duplicadas encontradas"
+
+    # 2026 ainda nao fechou o ano nas series anuais (ultimo ano anual = 2025);
+    # marca meses de anos incompletos para nao distorcer medias de sazonalidade
+    ultimo_ano_completo = int(long_df["Ano"].max())
+    mensal["AnoCompleto"] = mensal["Ano"] <= ultimo_ano_completo
+
+    mensal.to_csv(OUT_DIR / "anfavea_caminhoes_mensal_longo.csv", index=False, encoding="utf-8-sig")
+
+    mensal_wide = mensal.pivot_table(
+        index=["Data", "Ano", "Mes", "MesNome", "AnoCompleto"],
+        columns="Metrica",
+        values="Valor",
+    ).reset_index().sort_values("Data")
+    mensal_wide.to_csv(OUT_DIR / "anfavea_caminhoes_mensal_consolidado.csv", index=False, encoding="utf-8-sig")
+
+    print("\nPeriodo coberto por metrica (serie mensal):")
+    for nome in FILES_MENSAL:
+        sub = mensal[mensal["Metrica"] == nome]["Data"]
+        print(f"  {nome}: {sub.min().strftime('%Y-%m')} a {sub.max().strftime('%Y-%m')} ({sub.nunique()} meses)")
+
     print(f"\nArquivos gerados em {OUT_DIR}:")
-    print("  anfavea_caminhoes_longo.csv        (formato tidy: Ano, Metrica, Valor)")
-    print("  anfavea_caminhoes_consolidado.csv  (formato largo + metricas derivadas)")
+    print("  anfavea_caminhoes_longo.csv               (anual, tidy: Ano, Metrica, Valor)")
+    print("  anfavea_caminhoes_consolidado.csv         (anual, largo + metricas derivadas)")
+    print("  anfavea_caminhoes_mensal_longo.csv        (mensal, tidy: Data, Metrica, Valor)")
+    print("  anfavea_caminhoes_mensal_consolidado.csv  (mensal, largo)")
 
 
 if __name__ == "__main__":
