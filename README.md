@@ -170,7 +170,7 @@ doméstico (0,844).
 Isso também explica um padrão visível nos anos de crise doméstica: a participação da exportação na
 produção total **atinge seus maiores valores exatamente nos anos de colapso do mercado interno**
 (35,6% em 2016 e 34,0% em 2017, os dois maiores picos da série, bem acima da média histórica de
-~16%). Em números absolutos a exportação não necessariamente cresce nesses anos — ela cai menos do
+13,3%). Em números absolutos a exportação não necessariamente cresce nesses anos — ela cai menos do
 que a produção total, funcionando como amortecedor parcial para os fabricantes justamente quando o
 mercado interno mais precisa de alívio, sem no entanto ser, ainda hoje, a força que mais dita o
 tamanho do ciclo.
