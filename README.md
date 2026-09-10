@@ -205,15 +205,23 @@ mais como sinal de alerta do que qualquer expectativa isolada de mercado externo
 │   └── eda_sazonalidade.py       Índice sazonal mensal e recesso de fim de ano
 ├── tableau/
 │   └── story_guide.md            Roteiro de construção da Story no Tableau Desktop
+├── dashboard/
+│   └── story.html                Protótipo interativo da Story (HTML/SVG, mesma estrutura de 6 telas)
 └── README.md
 ```
 
-## Dashboard (Tableau Story)
+## Dashboard
 
 O dashboard final é construído como uma **Story** no Tableau Public, seguindo a mesma narrativa
-deste README (abertura → evolução → insight central → fechamento). Roteiro completo de construção
-em [`tableau/story_guide.md`](tableau/story_guide.md). Link para a versão publicada: *(a incluir
-após publicação no Tableau Public)*.
+deste README (abertura → evolução → sazonalidade → insight central → fechamento). Roteiro completo
+de construção em [`tableau/story_guide.md`](tableau/story_guide.md). Link para a versão publicada
+no Tableau Public: *(a incluir depois de montada no Tableau Desktop)*.
+
+Enquanto isso, [`dashboard/story.html`](dashboard/story.html) é um protótipo interativo standalone
+(HTML/SVG puro, sem dependências) com a mesma estrutura de 6 telas, os mesmos dados e os mesmos
+gráficos — útil como referência visual para montar a Story no Tableau, ou como versão alternativa
+do dashboard. Para abrir: baixe o arquivo e abra no navegador, ou sirva a pasta localmente
+(`python -m http.server`, por exemplo) e acesse `dashboard/story.html`.
 
 ## Fontes das causas apontadas para os pontos de inflexão
 

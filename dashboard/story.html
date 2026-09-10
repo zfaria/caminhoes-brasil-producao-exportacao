@@ -1,0 +1,770 @@
+<title>Caminhões do Brasil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- design tokens ---------- */
+  :root{
+    --bg:            #eef1f2;
+    --surface:       #fcfcfb;
+    --surface-2:     #f2f4f3;
+    --ink:           #0b0e12;
+    --ink-2:         #52565b;
+    --ink-muted:     #898781;
+    --grid:          #e1e0d9;
+    --baseline:      #c3c2b7;
+    --border:        rgba(11,11,11,0.10);
+    --accent:        #b06e00;
+    --accent-soft:   #f2e2c2;
+    --series-prod:   #2a78d6;
+    --series-exp:    #eb6834;
+    --series-emp:    #1baf7a;
+    --good:          #006300;
+    --critical:      #d03b3b;
+    --shadow:        0 1px 2px rgba(11,11,11,.06), 0 8px 24px -12px rgba(11,11,11,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:          #0e1013;
+      --surface:     #191c20;
+      --surface-2:   #14171a;
+      --ink:         #f5f6f7;
+      --ink-2:       #c3c6ca;
+      --ink-muted:   #8b8d90;
+      --grid:        #2c2e31;
+      --baseline:    #3a3d41;
+      --border:      rgba(255,255,255,0.10);
+      --accent:      #e0a940;
+      --accent-soft: #3a2f14;
+      --series-prod: #3987e5;
+      --series-exp:  #d95926;
+      --series-emp:  #199e70;
+      --good:        #35c235;
+      --critical:    #e66767;
+      --shadow:      0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:            #0e1013;
+    --surface:       #191c20;
+    --surface-2:     #14171a;
+    --ink:           #f5f6f7;
+    --ink-2:         #c3c6ca;
+    --ink-muted:     #8b8d90;
+    --grid:          #2c2e31;
+    --baseline:      #3a3d41;
+    --border:        rgba(255,255,255,0.10);
+    --accent:        #e0a940;
+    --accent-soft:   #3a2f14;
+    --series-prod:   #3987e5;
+    --series-exp:    #d95926;
+    --series-emp:    #199e70;
+    --good:          #35c235;
+    --critical:      #e66767;
+    --shadow:        0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:"IBM Plex Sans",system-ui,sans-serif;}
+  .app{max-width:1180px; margin:0 auto; padding:20px 20px 40px;}
+
+  .display{font-family:"Bebas Neue",system-ui,sans-serif; letter-spacing:.02em; text-wrap:balance;}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums;}
+  .eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600;}
+
+  /* ---------- header + nav ---------- */
+  header.top{display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:6px 2px 18px; border-bottom:1px solid var(--border); margin-bottom:18px; flex-wrap:wrap;}
+  header.top .brand{display:flex; flex-direction:column; gap:2px;}
+  header.top .brand .title{font-family:"Bebas Neue",system-ui,sans-serif; font-size:26px; letter-spacing:.03em; line-height:1;}
+  header.top .brand .sub{font-size:12.5px; color:var(--ink-2);}
+  header.top .source{font-size:12px; color:var(--ink-muted); text-align:right;}
+  header.top .source a{color:var(--ink-2);}
+
+  nav.story-nav{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:18px; scrollbar-width:thin;}
+  nav.story-nav button{
+    flex:0 0 auto; display:flex; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:9px 14px 9px 10px; cursor:pointer; color:var(--ink-2); font-size:12.5px; font-weight:500;
+    transition:background .15s, color .15s, border-color .15s;
+    max-width:190px;
+  }
+  nav.story-nav button .num{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; width:20px; height:20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; background:var(--surface-2); color:var(--ink-muted); flex:0 0 auto;
+  }
+  nav.story-nav button .lbl{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  nav.story-nav button[aria-current="true"]{border-color:var(--accent); color:var(--ink); background:var(--accent-soft);}
+  nav.story-nav button[aria-current="true"] .num{background:var(--accent); color:#fff;}
+  nav.story-nav button:hover{border-color:var(--accent);}
+  nav.story-nav button:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+
+  /* ---------- panels ---------- */
+  main{min-height:560px;}
+  .panel{display:flex; flex-direction:column; gap:18px;}
+  .panel[hidden]{display:none;}
+
+  .panel-head{display:flex; flex-direction:column; gap:6px; max-width:760px;}
+  .panel-head h1{font-family:"Bebas Neue",system-ui,sans-serif; font-size:clamp(28px,4vw,42px); line-height:1.02; margin:0; text-wrap:balance;}
+  .panel-head p{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.55; max-width:66ch;}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:18px 20px 14px;}
+  .card .card-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:6px; flex-wrap:wrap;}
+  .card .card-head h2{font-size:14px; font-weight:600; margin:0; color:var(--ink);}
+  .card .card-head .note{font-size:12px; color:var(--ink-muted); max-width:38ch; text-align:right;}
+  .card svg{display:block; width:100%; height:auto;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:820px){ .grid-2{grid-template-columns:1fr;} }
+
+  /* ---------- hero (screen 1) ---------- */
+  .hero{position:relative; border-radius:16px; overflow:hidden; background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow); padding:38px 28px 30px;}
+  .hero svg.spark{position:absolute; inset:0; width:100%; height:100%; opacity:.14;}
+  .hero-content{position:relative; z-index:1; max-width:640px;}
+  .hero .eyebrow{margin-bottom:10px; display:block;}
+  .hero h1{font-family:"Bebas Neue"; font-size:clamp(30px,5vw,50px); line-height:1.02; margin:0 0 14px; text-wrap:balance;}
+  .hero p{color:var(--ink-2); font-size:15px; line-height:1.6; margin:0 0 22px; max-width:58ch;}
+  .hero .figure{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+  .hero .figure .num{font-family:"IBM Plex Mono"; font-weight:600; font-size:clamp(34px,6vw,58px); line-height:1; color:var(--accent);}
+  .hero .figure .cap{font-size:13px; color:var(--ink-muted); max-width:22ch; line-height:1.4;}
+
+  /* ---------- stat tiles ---------- */
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px;}
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px;}
+  .tile .tval{font-family:"IBM Plex Mono"; font-weight:600; font-size:26px; color:var(--accent);}
+  .tile .tlbl{font-size:13px; color:var(--ink); font-weight:600;}
+  .tile .tsub{font-size:12px; color:var(--ink-muted); line-height:1.45;}
+
+  /* ---------- legend ---------- */
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2); margin-top:6px;}
+  .legend button{display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; color:inherit; font:inherit; padding:2px 0; opacity:1;}
+  .legend button[data-off="true"]{opacity:.35;}
+  .legend .sw{width:11px; height:11px; border-radius:3px; flex:0 0 auto;}
+
+  /* ---------- table view (accessibility) ---------- */
+  details.tview{margin-top:8px;}
+  details.tview summary{cursor:pointer; font-size:12px; color:var(--ink-2); font-weight:500;}
+  details.tview .twrap{overflow-x:auto; margin-top:8px;}
+  table.dt{border-collapse:collapse; width:100%; font-family:"IBM Plex Mono"; font-size:11.5px;}
+  table.dt th, table.dt td{padding:5px 10px; text-align:right; border-bottom:1px solid var(--grid); white-space:nowrap;}
+  table.dt th:first-child, table.dt td:first-child{text-align:left;}
+  table.dt th{color:var(--ink-muted); font-weight:500; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em;}
+
+  /* ---------- tooltip ---------- */
+  #tooltip{position:fixed; z-index:50; pointer-events:none; background:var(--ink); color:var(--bg); border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.5; box-shadow:0 6px 20px rgba(0,0,0,.25); max-width:220px;}
+  #tooltip[hidden]{display:none;}
+  #tooltip .tt-title{font-weight:600; margin-bottom:2px; font-family:"IBM Plex Mono";}
+  #tooltip .tt-row{display:flex; justify-content:space-between; gap:10px;}
+  #tooltip .tt-row .sw{width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:6px;}
+
+  /* ---------- inflection callouts (screen 2) ---------- */
+  .annot-label{font-size:9.5px; font-family:"IBM Plex Mono"; fill:var(--ink-2);}
+  .annot-line{stroke:var(--ink-muted); stroke-width:1; stroke-dasharray:2 2;}
+
+  /* ---------- source list ---------- */
+  .sources{font-size:12px; color:var(--ink-muted); line-height:1.8;}
+  .sources a{color:var(--ink-2);}
+  .sources ol{margin:6px 0 0; padding-left:18px;}
+
+  /* ---------- controls ---------- */
+  .story-controls{display:flex; align-items:center; justify-content:space-between; margin-top:26px; padding-top:14px; border-top:1px solid var(--border);}
+  .story-controls .btn{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 16px; cursor:pointer; font-size:13px; font-weight:500; color:var(--ink);}
+  .story-controls .btn:hover{border-color:var(--accent);}
+  .story-controls .btn:disabled{opacity:.35; cursor:default;}
+  .story-controls .btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  .story-controls .idx{font-family:"IBM Plex Mono"; font-size:12px; color:var(--ink-muted);}
+
+  .closing-tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px;}
+  .closing-quote{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:22px 24px; font-size:15px; line-height:1.65; color:var(--ink); max-width:780px;}
+  .closing-quote .who{margin-top:14px; font-size:12.5px; color:var(--ink-muted);}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="title">CAMINHÕES DO BRASIL</span>
+      <span class="sub">Produção, exportação e os ciclos de um mercado interno &middot; ANFAVEA 1957&ndash;2025</span>
+    </div>
+    <div class="source">Fonte: ANFAVEA, Edições em Excel<br><a href="https://anfavea.com.br/site/edicoes-em-excel/" target="_blank" rel="noopener">anfavea.com.br/site/edicoes-em-excel</a></div>
+  </header>
+
+  <nav class="story-nav" id="storyNav" aria-label="Pontos da história"></nav>
+
+  <main id="main"></main>
+
+  <div class="story-controls">
+    <button class="btn" id="btnPrev">&larr; Anterior</button>
+    <span class="idx" id="pageIdx">1 / 6</span>
+    <button class="btn" id="btnNext">Próximo &rarr;</button>
+  </div>
+</div>
+
+<div id="tooltip" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   DADOS REAIS — ANFAVEA, extraídos 10/09/2026
+   anual: [ano, producao, exportacao|null, emplacamento, exportPctProd|null, prodVar%|null, expVar%|null]
+   ============================================================ */
+var ANNUAL = [
+[1957,16259,null,18063,null,null,null],
+[1958,26998,null,27384,null,66.05,null],
+[1959,36657,null,37211,null,35.78,null],
+[1960,37810,null,38053,null,3.15,null],
+[1961,26891,null,26289,null,-28.88,null],
+[1962,36174,null,36194,null,34.52,null],
+[1963,21556,null,21536,null,-40.41,null],
+[1964,21790,null,21174,null,1.09,null],
+[1965,21828,9,22451,0.04,0.17,null],
+[1966,31098,3,30547,0.01,42.47,-66.67],
+[1967,27141,3,27609,0.01,-12.72,0.0],
+[1968,40642,7,40458,0.02,49.74,133.33],
+[1969,40569,4,39433,0.01,-0.18,-42.86],
+[1970,38388,122,38167,0.32,-5.38,2950.0],
+[1971,38868,364,37643,0.94,1.25,198.36],
+[1972,50150,544,50342,1.08,29.03,49.45],
+[1973,64828,1384,64818,2.13,29.27,154.41],
+[1974,75149,2932,71433,3.90,15.92,111.85],
+[1975,74891,4416,69901,5.90,-0.34,50.61],
+[1976,80885,6084,74971,7.52,8.00,37.77],
+[1977,99527,6427,90247,6.46,23.05,5.64],
+[1978,83649,7524,78891,8.99,-15.95,17.07],
+[1979,89959,11255,78706,12.51,7.54,49.59],
+[1980,97463,14462,81933,14.84,8.34,28.49],
+[1981,69312,11745,55938,16.95,-28.88,-18.79],
+[1982,44000,2580,41257,5.86,-36.52,-78.03],
+[1983,33235,1419,34573,4.27,-24.47,-45.0],
+[1984,43117,1596,42884,3.70,29.73,12.47],
+[1985,60266,4738,55664,7.86,39.77,196.87],
+[1986,78634,5674,71853,7.22,30.48,19.76],
+[1987,67935,11244,56385,16.55,-13.61,98.17],
+[1988,68880,12924,54912,18.76,1.39,14.94],
+[1989,57013,9988,48178,17.52,-17.23,-22.72],
+[1990,48219,5060,41313,10.49,-15.42,-49.34],
+[1991,46715,3601,41464,7.71,-3.12,-28.83],
+[1992,30960,7794,25659,25.17,-33.73,116.44],
+[1993,45382,8588,38383,18.92,46.58,10.19],
+[1994,60019,10390,52349,17.31,32.25,20.98],
+[1995,70073,8266,58734,11.80,16.75,-20.44],
+[1996,48022,7883,42134,16.42,-31.47,-4.63],
+[1997,63414,12126,54931,19.12,32.05,53.82],
+[1998,63264,14042,52768,22.20,-0.24,15.8],
+[1999,55194,8386,50665,15.19,-12.76,-40.28],
+[2000,71114,8745,69209,12.30,28.84,4.28],
+[2001,77251,6562,73517,8.49,8.63,-24.96],
+[2002,68354,5291,65680,7.74,-11.52,-19.37],
+[2003,77785,11685,65962,15.02,13.80,120.85],
+[2004,104792,23216,81484,22.15,34.72,98.68],
+[2005,112921,33632,79533,29.78,7.76,44.87],
+[2006,103297,35083,75971,33.96,-8.52,4.31],
+[2007,133739,38111,98585,28.50,29.47,8.63],
+[2008,163757,34831,122287,21.27,22.45,-8.61],
+[2009,120994,10851,109827,8.97,-26.11,-68.85],
+[2010,189933,21182,157707,11.15,56.98,95.21],
+[2011,223602,27034,172870,12.09,17.73,27.63],
+[2012,133403,23067,139174,17.29,-40.34,-14.67],
+[2013,187002,24201,154576,12.94,40.18,4.92],
+[2014,139965,17737,137055,12.67,-25.15,-26.71],
+[2015,74062,20983,71652,28.33,-47.09,18.3],
+[2016,60482,21548,50560,35.63,-18.34,2.69],
+[2017,83044,28220,51943,33.98,37.30,30.96],
+[2018,105534,24642,76005,23.35,27.08,-12.68],
+[2019,113476,13552,101335,11.94,7.53,-45.0],
+[2020,90936,13243,89687,14.56,-19.86,-2.28],
+[2021,158810,22699,128689,14.29,74.64,71.4],
+[2022,161992,25258,126654,15.59,2.00,11.27],
+[2023,100535,16946,107960,16.86,-37.94,-32.91],
+[2024,141252,17890,124848,12.67,40.50,5.57],
+[2025,124116,26984,113479,21.74,-12.13,50.83]
+];
+var COLS = {ano:0, prod:1, exp:2, emp:3, expPct:4, prodVar:5, expVar:6};
+
+/* índice sazonal por mês (valor do mês / média dos 12 meses do ano),
+   calculado em analysis/eda_sazonalidade.py */
+var MESES = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+var SEASON = {
+  prod: [0.816,0.890,1.019,0.922,1.032,1.043,1.077,1.112,1.057,1.122,1.047,0.861],
+  emp:  [0.843,0.846,1.024,0.973,1.025,1.051,1.066,1.098,1.023,1.049,0.939,1.062],
+  exp:  [0.589,0.901,1.041,0.907,1.033,1.037,1.074,1.089,1.122,1.169,1.106,0.933]
+};
+
+var CORR_WINDOWS = [
+  {label:"Série completa (1966–25)", n:60, dom:0.910, exp:0.003},
+  {label:"1980–2025", n:46, dom:0.899, exp:0.430},
+  {label:"2000–2025", n:26, dom:0.850, exp:0.508},
+  {label:"2010–2025", n:16, dom:0.844, exp:0.575}
+];
+
+var INFLECTIONS = [
+  {y0:1980, y1:1982, label:"Crise da dívida externa", sub:"-33% em 2 anos"},
+  {y0:2008, y1:2009, label:"Crise financeira global", sub:"-26,1%"},
+  {y0:2011, y1:2012, label:"PROCONVE P7 (Euro 5)", sub:"-40,3%"},
+  {y0:2014, y1:2016, label:"Recessão 2015–16", sub:"-56,8% em 2 anos"},
+  {y0:2022, y1:2023, label:"PROCONVE P8 (Euro 6)", sub:"-37,9%"}
+];
+
+var fmtInt = function(n){ return Math.round(n).toLocaleString("pt-BR"); };
+var fmtPct = function(n, dec){ dec = dec===undefined?1:dec; var s=n.toFixed(dec).replace(".",","); return (n>0?"+":"")+s+"%"; };
+var COLOR = {prod:"var(--series-prod)", exp:"var(--series-exp)", emp:"var(--series-emp)"};
+
+/* ============================================================
+   SVG helpers
+   ============================================================ */
+var SVGNS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){
+  var e = document.createElementNS(SVGNS, tag);
+  for(var k in attrs){ e.setAttribute(k, attrs[k]); }
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function scaleLinear(d0,d1,r0,r1){ return function(v){ return r0 + (v-d0)/(d1-d0) * (r1-r0); }; }
+
+var tooltipEl = document.getElementById("tooltip");
+function showTip(x,y,html){
+  tooltipEl.innerHTML = html;
+  tooltipEl.hidden = false;
+  var pad = 14, tw = tooltipEl.offsetWidth, th = tooltipEl.offsetHeight;
+  var vx = Math.min(x+pad, window.innerWidth - tw - 10);
+  var vy = Math.max(y - th - pad, 10);
+  tooltipEl.style.left = vx+"px";
+  tooltipEl.style.top = vy+"px";
+}
+function hideTip(){ tooltipEl.hidden = true; }
+
+/* ============================================================
+   CHART 1 — curva completa (screen 2)
+   ============================================================ */
+function drawCurve(svg){
+  var W=1040,H=460,ML=60,MR=20,MT=46,MB=36;
+  var pw=W-ML-MR, ph=H-MT-MB;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","Gráfico de linha: produção, emplacamento e exportação de caminhões, 1957 a 2025");
+  var n=ANNUAL.length;
+  var x = scaleLinear(0, n-1, ML, ML+pw);
+  var y = scaleLinear(0, 260000, MT+ph, MT);
+
+  // gridlines
+  [0,50000,100000,150000,200000,250000].forEach(function(v){
+    el("line",{x1:ML,x2:ML+pw,y1:y(v),y2:y(v),stroke:"var(--grid)","stroke-width":1},svg);
+    el("text",{x:ML-8,y:y(v)+4,"text-anchor":"end","font-size":10,fill:"var(--ink-muted)",class:"mono"},svg).textContent = v===0?"0":(v/1000)+" mil";
+  });
+  // x ticks every 10 years
+  ANNUAL.forEach(function(row,i){
+    var yr=row[COLS.ano];
+    if(yr % 10 === 0 || i===0 || i===n-1){
+      el("text",{x:x(i),y:MT+ph+18,"text-anchor":"middle","font-size":10,fill:"var(--ink-muted)"},svg).textContent = yr;
+      el("line",{x1:x(i),x2:x(i),y1:MT+ph,y2:MT+ph+4,stroke:"var(--baseline)"},svg);
+    }
+  });
+
+  var seriesDefs = [
+    {key:"emp", col:COLS.emp, color:"var(--series-emp)", name:"Emplacamento"},
+    {key:"exp", col:COLS.exp, color:"var(--series-exp)", name:"Exportação"},
+    {key:"prod", col:COLS.prod, color:"var(--series-prod)", name:"Produção"}
+  ];
+  var paths = {};
+  seriesDefs.forEach(function(s){
+    var d="";
+    ANNUAL.forEach(function(row,i){
+      var v=row[s.col];
+      if(v===null||v===undefined) return;
+      d += (d===""?"M":"L") + x(i).toFixed(1) + " " + y(v).toFixed(1) + " ";
+    });
+    var p = el("path",{d:d, fill:"none", stroke:s.color, "stroke-width":s.key==="prod"?2.4:2, "stroke-linecap":"round","stroke-linejoin":"round", "data-series":s.key},svg);
+    paths[s.key]=p;
+  });
+
+  // inflection annotations (on Producao line)
+  INFLECTIONS.forEach(function(inf){
+    var i0 = ANNUAL.findIndex(function(r){return r[COLS.ano]===inf.y0;});
+    var i1 = ANNUAL.findIndex(function(r){return r[COLS.ano]===inf.y1;});
+    var xi = x((i0+i1)/2);
+    var v = Math.max(ANNUAL[i0][COLS.prod], ANNUAL[i1][COLS.prod]);
+    var yTop = Math.max(y(v) - 34, MT + 6);
+    el("line",{x1:xi,x2:xi,y1:yTop+30,y2:y(v),class:"annot-line"},svg);
+    var t1=el("text",{x:xi,y:yTop,"text-anchor":"middle",class:"annot-label","font-weight":600},svg);
+    t1.textContent = inf.label;
+    var t2=el("text",{x:xi,y:yTop+12,"text-anchor":"middle",class:"annot-label",fill:"var(--critical)"},svg);
+    t2.textContent = inf.sub;
+  });
+
+  // hover layer
+  var hoverLine = el("line",{x1:0,x2:0,y1:MT,y2:MT+ph,stroke:"var(--ink-muted)","stroke-width":1,opacity:0},svg);
+  var hoverDots = {};
+  seriesDefs.forEach(function(s){ hoverDots[s.key] = el("circle",{r:4,fill:s.color,stroke:"var(--surface)","stroke-width":1.5,opacity:0},svg); });
+  var overlay = el("rect",{x:ML,y:MT,width:pw,height:ph,fill:"transparent"},svg);
+  overlay.addEventListener("mousemove", function(ev){
+    var pt = svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+    var loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var i = Math.round((loc.x-ML)/pw*(n-1));
+    i = Math.max(0, Math.min(n-1, i));
+    var row = ANNUAL[i];
+    hoverLine.setAttribute("x1",x(i)); hoverLine.setAttribute("x2",x(i)); hoverLine.setAttribute("opacity",1);
+    var rows="";
+    seriesDefs.forEach(function(s){
+      var v = row[s.col];
+      hoverDots[s.key].setAttribute("cx", x(i));
+      if(v===null||v===undefined){ hoverDots[s.key].setAttribute("opacity",0); }
+      else { hoverDots[s.key].setAttribute("cy", y(v)); hoverDots[s.key].setAttribute("opacity",1);
+        rows += '<div class="tt-row"><span><span class="sw" style="background:'+s.color+'"></span>'+s.name+'</span><span>'+(v===null?"—":fmtInt(v))+'</span></div>';
+      }
+    });
+    showTip(ev.clientX, ev.clientY, '<div class="tt-title">'+row[COLS.ano]+'</div>'+rows);
+  });
+  overlay.addEventListener("mouseleave", function(){
+    hoverLine.setAttribute("opacity",0);
+    Object.keys(hoverDots).forEach(function(k){hoverDots[k].setAttribute("opacity",0);});
+    hideTip();
+  });
+
+  return {paths:paths};
+}
+
+/* ============================================================
+   CHART 2 — comparação regulatória (screen 3)
+   ============================================================ */
+function drawRegulatory(svg){
+  var W=1040,H=360,MT=20,MB=54,gap=48;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","Gráfico de barras comparando os ciclos de produção 2009-2014 e 2020-2025, ambos com queda de cerca de 40% no ano de entrada de nova norma de emissões");
+  var facets = [
+    {years:[2009,2010,2011,2012,2013,2014], title:"2009–2014 · PROCONVE P7", crash:2012, peak:2011},
+    {years:[2020,2021,2022,2023,2024,2025], title:"2020–2025 · PROCONVE P8", crash:2023, peak:2022}
+  ];
+  var facetW = (W - gap)/2;
+  var maxV = 230000;
+  var ph = H-MT-MB;
+  facets.forEach(function(f, fi){
+    var fx0 = fi*(facetW+gap);
+    el("text",{x:fx0,y:MT-4,"font-size":12,"font-weight":600,fill:"var(--ink)"},svg).textContent = f.title;
+    var bw = (facetW/6) - 10;
+    var y = scaleLinear(0, maxV, MT+ph, MT+14);
+    // gridline at 0
+    el("line",{x1:fx0,x2:fx0+facetW,y1:y(0),y2:y(0),stroke:"var(--baseline)"},svg);
+    f.years.forEach(function(yr,i){
+      var row = ANNUAL.find(function(r){return r[COLS.ano]===yr;});
+      var v = row[COLS.prod];
+      var bx = fx0 + i*(facetW/6) + 5;
+      var byTop = y(v);
+      var isCrash = yr===f.crash, isPeak = yr===f.peak;
+      var fill = isCrash ? "var(--critical)" : (isPeak ? "var(--series-prod)" : "var(--ink-muted)");
+      var opac = isCrash||isPeak ? 1 : 0.45;
+      var rect = el("rect",{x:bx,y:byTop,width:bw,height:y(0)-byTop,rx:3,fill:fill,opacity:opac},svg);
+      rect.addEventListener("mousemove",function(ev){
+        showTip(ev.clientX,ev.clientY,'<div class="tt-title">'+yr+'</div><div class="tt-row"><span>Produção</span><span>'+fmtInt(v)+'</span></div>'+(row[COLS.prodVar]!==null?'<div class="tt-row"><span>Variação</span><span>'+fmtPct(row[COLS.prodVar])+'</span></div>':""));
+      });
+      rect.addEventListener("mouseleave",hideTip);
+      el("text",{x:bx+bw/2,y:y(0)+16,"text-anchor":"middle","font-size":10,fill:"var(--ink-muted)"},svg).textContent = yr;
+      if(isCrash){
+        el("text",{x:bx+bw/2,y:byTop-8,"text-anchor":"middle","font-size":10.5,"font-weight":600,fill:"var(--critical)",class:"mono"},svg).textContent = fmtPct(row[COLS.prodVar],1);
+      }
+    });
+  });
+  return {};
+}
+
+/* ============================================================
+   CHART 3 — sazonalidade mensal (screen 4)
+   ============================================================ */
+function drawSeasonality(svg){
+  var W=1040,H=420,ML=52,MR=20,MT=20,MB=40;
+  var pw=W-ML-MR, ph=H-MT-MB;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","Gráfico de barras: índice sazonal mensal de produção, emplacamento e exportação de caminhões, com vale em janeiro e pico entre agosto e outubro");
+  var y = scaleLinear(0.5, 1.25, MT+ph, MT);
+  [0.5,0.75,1.0,1.25].forEach(function(v){
+    el("line",{x1:ML,x2:ML+pw,y1:y(v),y2:y(v),stroke:v===1?"var(--baseline)":"var(--grid)","stroke-width":1,"stroke-dasharray":v===1?"4 3":"none"},svg);
+    el("text",{x:ML-8,y:y(v)+4,"text-anchor":"end","font-size":10,fill:"var(--ink-muted)"},svg).textContent = v.toFixed(2);
+  });
+  el("text",{x:ML+pw,y:y(1.0)-5,"text-anchor":"end","font-size":9.5,fill:"var(--ink-muted)"},svg).textContent = "média do ano";
+
+  var groupW = pw/12;
+  var series = [
+    {key:"prod", data:SEASON.prod, color:"var(--series-prod)", name:"Produção"},
+    {key:"emp", data:SEASON.emp, color:"var(--series-emp)", name:"Emplacamento"},
+    {key:"exp", data:SEASON.exp, color:"var(--series-exp)", name:"Exportação (2001–25)"}
+  ];
+  MESES.forEach(function(m,mi){
+    var gx = ML + mi*groupW;
+    el("text",{x:gx+groupW/2,y:MT+ph+16,"text-anchor":"middle","font-size":10,fill:"var(--ink-muted)"},svg).textContent = m;
+    var bw = (groupW-8)/3;
+    series.forEach(function(s,si){
+      var v = s.data[mi];
+      var bx = gx + 4 + si*bw;
+      var byTop = y(Math.max(v,0.5));
+      var rect = el("rect",{x:bx,y:byTop,width:bw-1.5,height:y(0.5)-byTop,rx:2,fill:s.color},svg);
+      rect.addEventListener("mousemove",function(ev){
+        showTip(ev.clientX,ev.clientY,'<div class="tt-title">'+m+' · '+s.name+'</div><div class="tt-row"><span>Índice sazonal</span><span>'+v.toFixed(3)+'</span></div>');
+      });
+      rect.addEventListener("mouseleave",hideTip);
+    });
+  });
+  return {};
+}
+
+/* ============================================================
+   CHART 4 — scatter variação % produção x exportação (screen 5)
+   ============================================================ */
+function drawScatter(svg){
+  var W=520,H=396,ML=50,MR=16,MT=16,MB=50;
+  var pw=W-ML-MR, ph=H-MT-MB;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","Gráfico de dispersão: variação percentual anual de produção versus exportação, 2000 a 2025, com linha de tendência de inclinação positiva");
+  var pts = ANNUAL.filter(function(r){return r[COLS.ano]>=2000 && r[COLS.prodVar]!==null && r[COLS.expVar]!==null;});
+  var xs = pts.map(function(r){return r[COLS.prodVar];});
+  var ys = pts.map(function(r){return r[COLS.expVar];});
+  var xMin=Math.min.apply(null,xs), xMax=Math.max.apply(null,xs);
+  var yMin=Math.min.apply(null,ys), yMax=Math.max.apply(null,ys);
+  var padX=(xMax-xMin)*0.12, padY=(yMax-yMin)*0.12;
+  var x = scaleLinear(xMin-padX, xMax+padX, ML, ML+pw);
+  var y = scaleLinear(yMin-padY, yMax+padY, MT+ph, MT);
+
+  // zero lines
+  el("line",{x1:x(0),x2:x(0),y1:MT,y2:MT+ph,stroke:"var(--grid)"},svg);
+  el("line",{x1:ML,x2:ML+pw,y1:y(0),y2:y(0),stroke:"var(--grid)"},svg);
+  el("text",{x:ML+pw/2,y:MT+ph+34,"text-anchor":"middle","font-size":10,fill:"var(--ink-muted)"},svg).textContent = "Variação da produção →";
+  var yl = el("text",{x:14,y:MT+8,"font-size":10,fill:"var(--ink-muted)"},svg); yl.textContent="↑ exportação";
+
+  // linear regression (least squares)
+  var nP=xs.length, sx=0,sy=0,sxy=0,sxx=0;
+  for(var i=0;i<nP;i++){ sx+=xs[i]; sy+=ys[i]; sxy+=xs[i]*ys[i]; sxx+=xs[i]*xs[i]; }
+  var slope = (nP*sxy - sx*sy)/(nP*sxx - sx*sx);
+  var intercept = (sy - slope*sx)/nP;
+  var lx0=xMin-padX, lx1=xMax+padX;
+  el("line",{x1:x(lx0),y1:y(slope*lx0+intercept),x2:x(lx1),y2:y(slope*lx1+intercept),stroke:"var(--accent)","stroke-width":2,"stroke-dasharray":"5 4"},svg);
+
+  pts.forEach(function(r){
+    var c = el("circle",{cx:x(r[COLS.prodVar]),cy:y(r[COLS.expVar]),r:5,fill:"var(--series-prod)",opacity:0.8,stroke:"var(--surface)","stroke-width":1},svg);
+    c.addEventListener("mousemove",function(ev){
+      showTip(ev.clientX,ev.clientY,'<div class="tt-title">'+r[COLS.ano]+'</div><div class="tt-row"><span>Produção</span><span>'+fmtPct(r[COLS.prodVar])+'</span></div><div class="tt-row"><span>Exportação</span><span>'+fmtPct(r[COLS.expVar])+'</span></div>');
+    });
+    c.addEventListener("mouseleave",hideTip);
+  });
+  // axis ticks (min/max)
+  [xMin,0,xMax].forEach(function(v){ el("text",{x:x(v),y:MT+ph+18,"text-anchor":"middle","font-size":9.5,fill:"var(--ink-muted)"},svg).textContent=Math.round(v)+"%"; });
+  return {};
+}
+
+/* ============================================================
+   CHART 5 — participação da exportação na produção (screen 5)
+   ============================================================ */
+function drawExportShare(svg){
+  var W=520,H=380,ML=44,MR=14,MT=16,MB=34;
+  var pw=W-ML-MR, ph=H-MT-MB;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","Gráfico de barras: participação percentual da exportação na produção total de caminhões, 1965 a 2025, com pico em 2016 e 2017");
+  var rows = ANNUAL.filter(function(r){return r[COLS.expPct]!==null;});
+  var n = rows.length;
+  var x = scaleLinear(0, n-1, ML, ML+pw);
+  var y = scaleLinear(0, 38, MT+ph, MT);
+  var avg = rows.reduce(function(a,r){return a+r[COLS.expPct];},0)/n;
+  [0,10,20,30].forEach(function(v){
+    el("line",{x1:ML,x2:ML+pw,y1:y(v),y2:y(v),stroke:"var(--grid)"},svg);
+    el("text",{x:ML-6,y:y(v)+3,"text-anchor":"end","font-size":9,fill:"var(--ink-muted)"},svg).textContent=v+"%";
+  });
+  el("line",{x1:ML,x2:ML+pw,y1:y(avg),y2:y(avg),stroke:"var(--ink-muted)","stroke-width":1,"stroke-dasharray":"3 3"},svg);
+  el("text",{x:ML+pw,y:y(avg)-4,"text-anchor":"end","font-size":9,fill:"var(--ink-muted)"},svg).textContent="média "+avg.toFixed(1)+"%";
+  var bw = Math.max(pw/n - 1.2, 1);
+  rows.forEach(function(r,i){
+    var yr=r[COLS.ano], v=r[COLS.expPct];
+    var hi = (yr===2016||yr===2017);
+    var rect = el("rect",{x:x(i)-bw/2,y:y(v),width:bw,height:y(0)-y(v),fill:hi?"var(--series-exp)":"var(--series-exp)",opacity:hi?1:0.35},svg);
+    rect.addEventListener("mousemove",function(ev){
+      showTip(ev.clientX,ev.clientY,'<div class="tt-title">'+yr+'</div><div class="tt-row"><span>Exportação / produção</span><span>'+v.toFixed(1)+'%</span></div>');
+    });
+    rect.addEventListener("mouseleave",hideTip);
+    if(yr%10===0 || i===0 || i===n-1){ el("text",{x:x(i),y:MT+ph+15,"text-anchor":"middle","font-size":9,fill:"var(--ink-muted)"},svg).textContent=yr; }
+  });
+  return {};
+}
+
+/* ============================================================
+   hero sparkline
+   ============================================================ */
+function drawSpark(svg){
+  var W=1200,H=260,MT=20,MB=20;
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("aria-hidden","true");
+  var n=ANNUAL.length;
+  var x = scaleLinear(0,n-1,0,W);
+  var y = scaleLinear(0,230000,H-MB,MT);
+  var d="";
+  ANNUAL.forEach(function(r,i){ d += (d===""?"M":"L") + x(i).toFixed(1) + " " + y(r[COLS.prod]).toFixed(1) + " "; });
+  el("path",{d:d,fill:"none",stroke:"var(--series-prod)","stroke-width":2.5},svg);
+}
+
+/* ============================================================
+   STORY POINTS — build DOM
+   ============================================================ */
+var totalProd = ANNUAL.reduce(function(a,r){return a+r[COLS.prod];},0);
+
+var STORY = [
+{
+  id:"sp1", nav:"Abertura",
+  render:function(el0){
+    el0.innerHTML =
+    '<div class="hero">'+
+      '<svg class="spark"></svg>'+
+      '<div class="hero-content">'+
+        '<span class="eyebrow">ANFAVEA &middot; 1957&ndash;2025</span>'+
+        '<h1 class="display">Cada caminhão desse gráfico foi montado por alguém</h1>'+
+        '<p>O modal rodoviário responde por cerca de 61% da matriz de transporte de cargas do Brasil (dados CNT). Passei mais de 4 anos montando caminhões pesados na Scania Latin America — vi de dentro o que estes números da ANFAVEA registram de fora: os ciclos de alta que exigem hora extra, e as retrações que esvaziam a fábrica.</p>'+
+        '<div class="figure"><span class="num mono">'+fmtInt(totalProd)+'</span><span class="cap">caminhões produzidos no Brasil entre 1957 e 2025 — soma da série completa da ANFAVEA</span></div>'+
+      '</div>'+
+    '</div>';
+    drawSpark(el0.querySelector(".spark"));
+  }
+},
+{
+  id:"sp2", nav:"A curva",
+  render:function(el0){
+    el0.innerHTML =
+    '<div class="panel-head"><h1>Quase 70 anos em uma única curva</h1>'+
+    '<p>Produção e emplacamento (mercado interno) andam quase coladas — grande parte do que se produz é vendido no Brasil. A exportação é uma linha bem menor e mais estável. Cinco movimentos concentram as maiores quedas e altas da série.</p></div>'+
+    '<div class="card"><div class="card-head"><h2>Produção, exportação e emplacamento de caminhões (unidades/ano)</h2></div>'+
+    '<svg class="chart-curve"></svg>'+
+    '<div class="legend" id="legend-curve"></div>'+
+    '<details class="tview"><summary>Ver dados em tabela</summary><div class="twrap"></div></details>'+
+    '</div>';
+    var svg = el0.querySelector(".chart-curve");
+    var res = drawCurve(svg);
+    var legend = el0.querySelector("#legend-curve");
+    var defs = [["prod","Produção","var(--series-prod)"],["emp","Emplacamento","var(--series-emp)"],["exp","Exportação","var(--series-exp)"]];
+    defs.forEach(function(d){
+      var b=document.createElement("button");
+      b.innerHTML='<span class="sw" style="background:'+d[2]+'"></span>'+d[1];
+      b.addEventListener("click",function(){
+        var off = b.getAttribute("data-off")==="true";
+        b.setAttribute("data-off", off?"false":"true");
+        res.paths[d[0]].style.opacity = off?1:0;
+      });
+      legend.appendChild(b);
+    });
+    var twrap = el0.querySelector(".twrap");
+    var th = "<table class='dt'><thead><tr><th>Ano</th><th>Produção</th><th>Exportação</th><th>Emplacamento</th></tr></thead><tbody>";
+    ANNUAL.forEach(function(r){ th += "<tr><td>"+r[COLS.ano]+"</td><td>"+fmtInt(r[COLS.prod])+"</td><td>"+(r[COLS.exp]===null?"—":fmtInt(r[COLS.exp]))+"</td><td>"+fmtInt(r[COLS.emp])+"</td></tr>"; });
+    th += "</tbody></table>";
+    twrap.innerHTML = th;
+  }
+},
+{
+  id:"sp3", nav:"Padrão regulatório",
+  render:function(el0){
+    el0.innerHTML =
+    '<div class="panel-head"><h1>Duas vezes em onze anos, a mesma queda de ~40%</h1>'+
+    '<p>Em 2011 e em 2022, o mercado antecipou compras antes de uma nova norma de emissões (PROCONVE P7 em 2012, depois P8/Euro 6 em 2023) — e nos dois casos a produção caiu cerca de 40% no ano seguinte ao pico. Não é coincidência de mercado; é reação a uma data de corte regulatória conhecida com antecedência.</p></div>'+
+    '<div class="card"><div class="card-head"><h2>Produção de caminhões nas duas janelas regulatórias</h2><span class="note">Laranja escuro = ano de entrada da norma &middot; azul = ano de pico anterior</span></div>'+
+    '<svg class="chart-reg"></svg></div>';
+    drawRegulatory(el0.querySelector(".chart-reg"));
+  }
+},
+{
+  id:"sp4", nav:"Sazonalidade",
+  render:function(el0){
+    el0.innerHTML =
+    '<div class="panel-head"><h1>O ano também tem seu próprio ciclo</h1>'+
+    '<p>Índice sazonal = valor do mês ÷ média dos 12 meses do mesmo ano — isola o padrão de calendário do crescimento de longo prazo. Janeiro é o mês mais fraco do ano em 26 dos 69 anos da série, e dezembro em outros 23: juntos, 71% dos anos — coerente com o recesso coletivo de fim de ano que vivenciei na indústria. O pico fica entre agosto e outubro.</p></div>'+
+    '<div class="card"><div class="card-head"><h2>Índice sazonal por mês</h2></div>'+
+    '<svg class="chart-season"></svg>'+
+    '<div class="legend"><span style="display:flex;align-items:center;gap:6px"><span class="sw" style="background:var(--series-prod);display:inline-block;width:11px;height:11px;border-radius:3px"></span>Produção</span>'+
+    '<span style="display:flex;align-items:center;gap:6px"><span class="sw" style="background:var(--series-emp);display:inline-block;width:11px;height:11px;border-radius:3px"></span>Emplacamento</span>'+
+    '<span style="display:flex;align-items:center;gap:6px"><span class="sw" style="background:var(--series-exp);display:inline-block;width:11px;height:11px;border-radius:3px"></span>Exportação (2001–25)</span></div>'+
+    '<details class="tview"><summary>Nota sobre a janela de exportação</summary><div style="font-size:12px;color:var(--ink-2);line-height:1.6;padding-top:6px;max-width:70ch">A série completa de exportação mensal (1965–2025) é extremamente ruidosa nas décadas de 1960-80, quando os volumes mensais eram próximos de zero (0–3 unidades) — qualquer oscilação pequena gera índices desproporcionais. Por isso a leitura de sazonalidade de exportação usa a janela mais recente e representativa (2001–2025).</div></details>'+
+    '</div>';
+    drawSeasonality(el0.querySelector(".chart-season"));
+  }
+},
+{
+  id:"sp5", nav:"Insight central",
+  render:function(el0){
+    var rowsHtml = CORR_WINDOWS.map(function(w){
+      return '<tr><td>'+w.label+'</td><td class="mono">'+w.n+'</td><td class="mono">'+w.dom.toFixed(3)+'</td><td class="mono">'+w.exp.toFixed(3)+'</td></tr>';
+    }).join("");
+    el0.innerHTML =
+    '<div class="panel-head"><h1>O mercado interno sempre decidiu o ciclo — mas a exportação parou de ser irrelevante</h1>'+
+    '<p>A correlação entre a variação anual de produção e de exportação, na série completa, é quase zero (0,003) — mas isso é um artefato: nas décadas de 1960-70 a base de exportação era tão pequena (3 a 9 unidades/ano) que oscilações mínimas viravam percentuais absurdos (1970: +2.950%, de 4 para 122 unidades). Restringindo a janelas mais recentes, a correlação sobe de forma consistente, enquanto a do mercado interno segue estável e maior.</p></div>'+
+    '<div class="card"><div class="card-head"><h2>Correlação da variação anual (%) por janela de tempo</h2></div>'+
+    '<div class="twrap"><table class="dt"><thead><tr><th>Janela</th><th>n (anos)</th><th>Prod. × Emplac.</th><th>Prod. × Export.</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div></div>'+
+    '<div class="grid-2">'+
+      '<div class="card"><div class="card-head"><h2>Variação % produção × exportação, 2000–2025</h2><span class="note">Tendência positiva moderada (r=0,51) — não mais horizontal</span></div><svg class="chart-scatter"></svg></div>'+
+      '<div class="card"><div class="card-head"><h2>Exportação como % da produção total</h2><span class="note">Pico em 2016–17, anos de colapso do mercado interno</span></div><svg class="chart-share"></svg></div>'+
+    '</div>';
+    drawScatter(el0.querySelector(".chart-scatter"));
+    drawExportShare(el0.querySelector(".chart-share"));
+  }
+},
+{
+  id:"sp6", nav:"Fechamento",
+  render:function(el0){
+    el0.innerHTML =
+    '<div class="panel-head"><h1>O que os dados confirmam de quem já viveu isso por dentro</h1></div>'+
+    '<div class="closing-tiles">'+
+      '<div class="tile"><span class="tval">0,84–0,91</span><span class="tlbl">Correlação com o mercado interno</span><span class="tsub">Estável em qualquer janela de tempo — o motor do ciclo é doméstico</span></div>'+
+      '<div class="tile"><span class="tval">71%</span><span class="tlbl">dos anos, dez/jan é o vale sazonal</span><span class="tsub">Recesso coletivo de fim de ano — reconhecível de quem já viveu na linha</span></div>'+
+      '<div class="tile"><span class="tval">2× em 11 anos</span><span class="tlbl">mesma queda de ~40% por antecipação regulatória</span><span class="tsub">PROCONVE P7 (2012) e P8 (2023) — gatilho previsível</span></div>'+
+      '<div class="tile"><span class="tval">13,7×</span><span class="tlbl">crescimento do pico (2011) sobre 1957</span><span class="tsub">16.259 → 223.602 unidades/ano</span></div>'+
+    '</div>'+
+    '<div class="closing-quote">Cada linha desse dataset que despenca 30, 40, quase 50% em um único ano tem um equivalente concreto no chão de fábrica: turnos cancelados, linha rodando mais devagar, fornecedores reprogramando entregas. E cada recuperação de +40%, +57%, +74% também tem o seu — hora extra, contratação às pressas, pressão para entregar o que ficou represado. Trabalhar dentro desse setor por mais de quatro anos não me deu acesso a nenhum dado que não esteja aqui; me deu a referência para reconhecer, nos números, o motivo de cada virada de ciclo que meus colegas de linha sentiam antes de qualquer manchete confirmar.'+
+    '<div class="who">José Faria Neto &mdash; analista de dados em transição de carreira, background em manufatura industrial (Scania Latin America)</div></div>'+
+    '<div class="card sources"><strong style="color:var(--ink)">Fontes das causas apontadas</strong><ol>'+
+      '<li>Crise da dívida externa (1980-82): <a href="https://blogdodesenvolvimento.bndes.gov.br/serie/eventos/1983-1992-crise-da-divida-externa-alta-da-inflacao-e-Estado-de-bem-estar-social/" target="_blank" rel="noopener">Blog do Desenvolvimento – BNDES</a></li>'+
+      '<li>Crise financeira 2008-09: <a href="https://www.correiobraziliense.com.br/app/noticia/economia/2010/01/08/internas_economia,165141/em-2009-producao-da-industria-automotiva-cai-mas-vendas-aumentam.shtml" target="_blank" rel="noopener">Correio Braziliense</a></li>'+
+      '<li>PROCONVE P7 / antecipação 2011-12: <a href="https://revistamt.com.br/Materias/Exibir/o-peso-para-as-construtoras" target="_blank" rel="noopener">Revista MT</a></li>'+
+      '<li>Recessão 2015-16: <a href="https://www.mckinsey.com/br/our-insights/blog-made-in-brazil/o-que-aconteceu-com-a-industria-automotiva-no-brasil" target="_blank" rel="noopener">McKinsey Brasil</a></li>'+
+      '<li>PROCONVE P8 / Euro 6 / antecipação 2022-23: <a href="https://www.autoindustria.com.br/2024/01/10/proconve-p8-limitou-desempenho-do-segmento-de-caminhoes-em-2023/" target="_blank" rel="noopener">AutoIndústria</a></li>'+
+      '<li>Pandemia 2020 / recuperação 2021: <a href="https://anfavea.com.br/docs/release_coletiva_08_01_2021.pdf" target="_blank" rel="noopener">ANFAVEA</a></li>'+
+      '<li>Matriz de transporte de cargas (~61% rodoviário): <a href="https://data.cnt.org.br/en/" target="_blank" rel="noopener">CNT Data</a></li>'+
+    '</ol></div>';
+  }
+}
+];
+
+/* ============================================================
+   NAV / RENDER LOOP
+   ============================================================ */
+var current = 0;
+var navEl = document.getElementById("storyNav");
+var mainEl = document.getElementById("main");
+var pageIdx = document.getElementById("pageIdx");
+var btnPrev = document.getElementById("btnPrev");
+var btnNext = document.getElementById("btnNext");
+
+STORY.forEach(function(sp, i){
+  var b = document.createElement("button");
+  b.innerHTML = '<span class="num">'+(i+1)+'</span><span class="lbl">'+sp.nav+'</span>';
+  b.addEventListener("click", function(){ goTo(i); });
+  navEl.appendChild(b);
+});
+
+function goTo(i){
+  current = Math.max(0, Math.min(STORY.length-1, i));
+  mainEl.innerHTML = "";
+  var section = document.createElement("section");
+  section.className = "panel";
+  mainEl.appendChild(section);
+  STORY[current].render(section);
+  Array.prototype.forEach.call(navEl.children, function(b,j){
+    b.setAttribute("aria-current", j===current ? "true":"false");
+  });
+  pageIdx.textContent = (current+1)+" / "+STORY.length;
+  btnPrev.disabled = current===0;
+  btnNext.disabled = current===STORY.length-1;
+  window.scrollTo({top:0, behavior:"instant"});
+}
+btnPrev.addEventListener("click", function(){ goTo(current-1); });
+btnNext.addEventListener("click", function(){ goTo(current+1); });
+document.addEventListener("keydown", function(ev){
+  if(ev.key==="ArrowRight") goTo(current+1);
+  if(ev.key==="ArrowLeft") goTo(current-1);
+});
+
+goTo(0);
+})();
+</script>
