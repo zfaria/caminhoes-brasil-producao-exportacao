@@ -103,9 +103,14 @@ caminhões mais do que outros segmentos automotivos durante a pandemia⁶), 2021
 Além dos ciclos de anos, existe um ciclo menor que se repete dentro de cada ano — e que qualquer
 um que já trabalhou numa linha de montagem reconhece: o calendário de produção não é plano.
 
-Calculando um índice sazonal por mês (valor do mês dividido pela média dos 12 meses do mesmo ano,
-o que isola o padrão de calendário do crescimento de longo prazo da série), o padrão é o mesmo nas
-três métricas — produção, emplacamento e exportação:
+Calculando um índice sazonal por mês (valor do mês dividido pela média dos 12 meses do mesmo ano) é
+possível isolar o padrão de calendário do crescimento de longo prazo da série — sem isso, comparar
+"janeiro de 1960" com "janeiro de 2020" em unidades absolutas não diria nada sobre sazonalidade, só
+sobre o quanto a indústria cresceu entre as duas datas. Na prática, o índice funciona como um "% em
+relação à média do próprio ano": um índice de **0,82** em janeiro significa que aquele mês produz,
+em média, **18% a menos** do que a média dos 12 meses daquele ano; um índice de **1,12** em outubro
+significa **12% a mais**. Aplicando esse cálculo, o padrão é o mesmo nas três métricas — produção,
+emplacamento e exportação:
 
 | | Mês mais fraco (índice) | Mês mais forte (índice) |
 |---|---|---|
