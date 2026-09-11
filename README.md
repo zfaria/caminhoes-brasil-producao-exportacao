@@ -219,13 +219,15 @@ mais como sinal de alerta do que qualquer expectativa isolada de mercado externo
 
 ## Dashboard
 
+**[Ver o dashboard ao vivo](https://claude.ai/code/artifact/d19aa6c8-4d74-4303-a74a-a15b88e1fca2)**
+
 O dashboard é uma página HTML/SVG standalone em [`dashboard/story.html`](dashboard/story.html),
 sem nenhuma dependência externa — abre direto no navegador. Segue a mesma narrativa deste README
 (abertura → evolução → padrão regulatório → sazonalidade → insight central → fechamento) em 6 telas
 navegáveis, com os gráficos reais (linha, barras, dispersão), legendas clicáveis, tooltips e tabela
 de dados por trás de cada gráfico.
 
-Para abrir: baixe o arquivo e abra direto no navegador, ou sirva a pasta localmente
+Para rodar localmente: baixe o arquivo e abra direto no navegador, ou sirva a pasta
 (`python -m http.server`, por exemplo) e acesse `dashboard/story.html`.
 
 ## Fontes das causas apontadas para os pontos de inflexão
