@@ -212,23 +212,23 @@ mais como sinal de alerta do que qualquer expectativa isolada de mercado externo
 ├── analysis/
 │   ├── eda_caminhoes.py          Picos, vales, variações e correlações (anual)
 │   └── eda_sazonalidade.py       Índice sazonal mensal e recesso de fim de ano
-├── dashboard/
-│   └── story.html                Dashboard interativo (HTML/SVG puro, sem dependências), 6 telas
+├── docs/
+│   └── index.html                Dashboard interativo (HTML/SVG puro, sem dependências), 6 telas — servido via GitHub Pages
 └── README.md
 ```
 
 ## Dashboard
 
-**[Ver o dashboard ao vivo](https://claude.ai/code/artifact/d19aa6c8-4d74-4303-a74a-a15b88e1fca2)**
+**[Ver o dashboard ao vivo](https://zfaria.github.io/caminhoes-brasil-producao-exportacao/)** (GitHub Pages)
+— também disponível como [Claude Artifact](https://claude.ai/code/artifact/d19aa6c8-4d74-4303-a74a-a15b88e1fca2).
 
-O dashboard é uma página HTML/SVG standalone em [`dashboard/story.html`](dashboard/story.html),
-sem nenhuma dependência externa — abre direto no navegador. Segue a mesma narrativa deste README
-(abertura → evolução → padrão regulatório → sazonalidade → insight central → fechamento) em 6 telas
-navegáveis, com os gráficos reais (linha, barras, dispersão), legendas clicáveis, tooltips e tabela
-de dados por trás de cada gráfico.
+O dashboard é uma página HTML/SVG standalone em [`docs/index.html`](docs/index.html), sem nenhuma
+dependência externa. Segue a mesma narrativa deste README (abertura → evolução → padrão regulatório
+→ sazonalidade → insight central → fechamento) em 6 telas navegáveis, com os gráficos reais (linha,
+barras, dispersão), legendas clicáveis, tooltips e tabela de dados por trás de cada gráfico.
 
 Para rodar localmente: baixe o arquivo e abra direto no navegador, ou sirva a pasta
-(`python -m http.server`, por exemplo) e acesse `dashboard/story.html`.
+(`python -m http.server`, por exemplo) e acesse `docs/index.html`.
 
 ## Fontes das causas apontadas para os pontos de inflexão
 
